@@ -1,0 +1,1148 @@
+---
+title: "Final Project Report"
+author: "Dinesh Kumaralingam"
+output: 
+  pdf_document:
+    toc: true
+  html_document:
+    toc: true
+---
+
+Executive Summary
+
+Flight cancellations and delays are a usual phenomenon in air travel that 
+causes distress to customers and operational issues for airlines. Flight delays 
+are most likely to cause passengers to miss connections, incur higher costs, 
+and distort airport operations. This project seeks to analyze flight delays at 
+New York City's three significant airports—John F. John F. Kennedy (JFK), 
+LaGuardia (LGA), and Newark (EWR)—using actual flight data of 2013. The aim is 
+to find significant causes of delay and establish models that will be able to 
+predict delays better.
+
+Main Purposes of the Study:
+
+1. Study delay patterns in NYC airports and find trends.
+
+2. Find the most common causes of flight delay—airline, weather, or airport 
+congestion.
+
+3. Develop predictive models that estimate potential delays using actual flight 
+data.
+
+4. Offer insights that enable airlines and travelers to make more informed
+travel choices.
+
+Approach and Methodology:
+
+1. Data Preparation & Cleaning – The data is cleaned to eliminate missing 
+values and prepare it for analysis.
+
+2. Exploratory Data Analysis (EDA) – Various visualizations, including 
+histograms, word clouds, and correlation heatmaps, are employed to reveal 
+underlying patterns.
+
+3. Model Building – Multiple Linear Regression (MLR) and Random Forest 
+Regression (RFR) models are constructed to predict delay.
+
+4. Model Assessment – Models are compared based on performance metrics like 
+RMSE and R² score to determine which model provides higher accuracy.
+Conclusion & Insights – Findings are explained to suggest actionable insights 
+in reducing delays.
+
+Key Findings:
+
+1. Flight delays on departure are the strongest indicator of delays in 
+arrival—if a flight leaves late, it will most likely also arrive late.
+
+2.Airline performance varies—different airlines experience more delays 
+than others.
+
+3.Weather is a factor, but not the biggest one—storms and low visibility can 
+delay flights, but airline operations and scheduling are greater factors.
+
+4.Random Forest was a better predictor than Multiple Linear Regression.
+
+Why This Study Is Important:
+
+1. To Airlines: Helps in improved scheduling of flights to minimize delays.
+
+2. To Passengers: Provides data on which airlines and routes are most reliable.
+
+3. To Airports: Helps in congestion detection and planning resources 
+accordingly.
+
+This study can be expanded in the future by incorporating real-time flight data
+, external weather data, and airport congestion data to create even more 
+precise predictive models.
+
+Introduction & Project Description
+
+1. Why Study Flight Delays?
+Anyone who has ever flown knows that flight delays are infuriating. Due to 
+either bad weather, mechanical issues, or airport congestion, delays 
+inconvenience millions of passengers every year. Not only a nuisance, 
+flight delays are also costly for airlines and affect airport efficiency.
+
+New York City's airports are amongst the busiest airports in the U.S. 
+Familiarity with delay patterns on these airports would help airlines, 
+passengers, as well as airport authorities to prepare better and cut down 
+on waste. Analyzing past flight statistics, we see which causes maximum delays 
+and, based on it, make a better prediction for the future.
+
+2. What We Want to Learn
+This project attempts to establish the top reasons why flights get delayed and 
+cancelled based on past flight records. Our main research questions we would 
+like to provide answers to are:
+
+I) What are the biggest causes of flight delays in NYC airports?
+
+II) Which airlines stand most chances of getting delayed?
+
+III) How strong is the influence of weather factors like wind, rain, or 
+snow on delay?
+
+IV) Are delays more common at certain times of day or during specific months?
+
+V) Are machine learning models the best way to predict delays?
+
+VI) Is airport congestion a factor of delays?
+
+How This Study Can Be Useful
+
+1. For Airlines – Airlines can make use of the results to more effectively plan 
+flight schedules and reduce delays.
+
+2. For Passengers – Passengers can choose flights and airlines with enhanced 
+on-time arrival.
+
+3. For Airports – Can help understand the patterns of congestion and improve 
+airport resource management.
+
+4. For Researchers – Provides a context for further research on predictive 
+modeling and air productivity.
+
+Scope of This Study
+
+We study the flight information for 2013 using the nycflights13 data set,
+which includes detailed information about flights departing from NYC airports. 
+The research involves data preprocessing, statistical inquiry, visualization, 
+and machine learning modeling to achieve insight into delay in flights.
+
+By making data-based decisions, this research contributes to improving airport 
+performance, airline operation, as well as overall passenger experience.
+
+Dataset Overview
+
+**Install necessary packages**
+
+Note that the following packages were installed once individually . 
+Then they were commented out.
+
+```{r, collapse=T}
+#install.packages("tidyverse")
+#install.packages("nycflights13")
+#install.packages("caret")
+#install.packages("randomForest")
+#install.packages("wordcloud")
+#install.packages("RColorBrewer")
+#install.packages("GGally")
+#install.packages("Metrics")
+#install.packages("ggdendro")
+#install.packages("Lahman")
+#install.packages("lubridate")
+```
+
+**Loading of necessary packages**
+
+```{r, collapse=T}
+library(tidyverse)      # for `ggplot2`, `dplyr`, `tidyr`, and more
+library(nycflights13)   # for NYC flights dataset
+library(caret)          # for machine learning models
+library(randomForest)   # for random forest regression
+library(wordcloud)      # for word cloud visualization
+library(RColorBrewer)   # for color palettes in visualizations
+library(GGally)         # for correlation matrices and EDA
+library(Metrics)        # for RMSE, R², and other evaluation metrics
+library(ggdendro)       # for hierarchical clustering dendrograms
+library(Lahman)         # for sports dataset (if required)
+library(lubridate)      # for date/time data handling
+```
+
+**Random seed setting for reproducibility**
+
+```{r}
+# setting the random seed so that the analysis is reproducible
+set.seed(232) # number will not be changed
+```
+
+**Loading of dataset**
+
+```{r}
+# Loading datasets from nycflights13 package
+data("flights")  
+data("airlines")  
+data("airports")  
+data("weather")  
+data("planes")   
+
+# Examining the structure of all datasets
+glimpse(flights)
+glimpse(airlines)
+glimpse(airports)
+glimpse(weather)
+glimpse(planes)
+```
+
+Dataset Overview – NYC Flights 2013 :
+
+For this study, we utilized the NYC Flights 2013 dataset from the 
+nycflights13 package, which contained detailed flight information for 
+departures from New York City's three major airports: John F. Kennedy 
+International Airport (JFK), LaGuardia Airport (LGA), and Newark Liberty
+International Airport (EWR). The dataset helped us analyze flight delays, 
+airline performance, airport congestion, and weather conditions, providing 
+valuable insights into the factors that contributed to flight delays.
+
+Description of the Dataset :
+
+The dataset consisted of five different tables, each capturing a specific 
+aspect of flights:
+
+1. flights – This was the primary dataset, containing details on each flight, 
+including departure and arrival times, delays, airline codes, and destinations.
+
+2. airlines – This lookup table provided the full names of airlines 
+corresponding to the carrier codes in the flights dataset.
+
+3. airports – This dataset included information on various airports, such as 
+latitude, longitude, and altitude.
+
+4. weather – It recorded hourly weather data at NYC airports, including
+temperature, humidity, wind speed, and visibility.
+
+5. planes – This dataset contained aircraft-specific details, such as 
+tail numbers, manufacturers, seating capacity, and engine types.
+
+Each of these datasets played a role in our analysis. The flights dataset was 
+the primary focus, as it contained key information about departure and arrival
+times, delays, and associated factors.
+
+Data Size (Raw Data Visibility) :
+
+Before performing any cleaning, the raw dataset contained:
+
+1. flights dataset → 336,776 rows and 19 columns (variables)
+
+2. airlines dataset → 16 rows and 2 columns (carrier and airline name)
+
+3. airports dataset → 1,458 rows and 8 columns (airport details)
+
+4. weather dataset → 26,115 rows and 15 columns (hourly weather data)
+
+5. planes dataset → 3,322 rows and 9 columns (aircraft specifications)
+
+This was the initial state of the dataset before we performed any data 
+preprocessing. The dataset size highlighted the richness of the data, allowing 
+us to analyze various aspects of flight delays in a detailed manner.
+
+Setting Random Seed & Loading the Dataset :
+
+To ensure reproducibility, we set a random seed before loading the dataset. 
+This step helped maintain consistency in randomized operations, such as data 
+sampling, ensuring that results remained the same every time the code was 
+executed.
+
+Once the seed was set, we proceeded with loading the nycflights13 package and 
+extracting the relevant datasets. After loading the data, we examined its 
+structure to gain a preliminary understanding of its contents.
+
+Examining the Structure : 
+
+We used the str(flights) function to inspect the structure of the dataset. 
+The output confirmed that the dataset contained:
+
+1. Time-related variables: year, month, day, dep_time, arr_time, sched_dep_time, 
+sched_arr_time
+
+2. Delay-related variables: dep_delay (departure delay in minutes), 
+arr_delay (arrival delay in minutes)
+
+3. Flight-specific variables: carrier (airline code), flight (flight number), 
+tailnum (aircraft identifier)
+
+4. Location variables: origin (departure airport), dest (destination airport)
+
+5. Performance indicators: air_time (flight duration), distance (flight distance
+)
+
+6. Operational details: hour, minute, time_hour (timestamp for scheduling)
+
+This structure provided a clear framework for understanding flight performance, 
+identifying delay trends, and building predictive models.
+
+Additional Datasets Used : 
+
+In addition to the main flights dataset, we incorporated:
+
+1. Airlines dataset to map airline codes to full names.
+
+2. Airports dataset to analyze departure and destination airport conditions.
+
+3. Weather dataset to include environmental factors in the delay analysis.
+
+4. Planes dataset to check whether aircraft type or age influenced delays.
+These supplementary datasets enriched our analysis, allowing us to explore
+various dimensions of flight performance beyond just delay times.
+
+**Exploratory Data Analysis**
+
+```{r}
+#HISTOGRAM ANALYSIS
+
+# PRE-CLEANING: Total Observations Before Cleaning
+pre_clean_count <- nrow(flights)
+
+# PRE-CLEANING HISTOGRAM: Departure Delay
+p1 <- ggplot(flights, aes(x = dep_delay)) +
+  geom_histogram(binwidth = 10, fill = "steelblue", color = "black") +
+  labs(title = paste("Departure Delay Distribution (Pre-Cleaning) | Total 
+                     Observations:", pre_clean_count),
+       x = "Departure Delay (minutes)",
+       y = "Frequency") +
+  theme_minimal()
+
+# PRE-CLEANING HISTOGRAM: Arrival Delay
+p2 <- ggplot(flights, aes(x = arr_delay)) +
+  geom_histogram(binwidth = 10, fill = "orange", color = "black") +
+  labs(title = paste("Arrival Delay Distribution (Pre-Cleaning) | Total 
+                     Observations:", pre_clean_count),
+       x = "Arrival Delay (minutes)",
+       y = "Frequency") +
+  theme_minimal()
+
+# CLEANING STEP: missing values & extreme outliers removal
+clean_flights <- flights %>%
+  drop_na(dep_delay, arr_delay) %>%  # Remove missing values
+  filter(between(dep_delay, -30, 500), between(arr_delay, -30, 500))  
+# Remove unrealistic values
+
+# POST-CLEANING: Total Observations After Cleaning
+post_clean_count <- nrow(clean_flights)
+
+# POST-CLEANING HISTOGRAM: Departure Delay
+p3 <- ggplot(clean_flights, aes(x = dep_delay)) +
+  geom_histogram(binwidth = 10, fill = "darkgreen", color = "black") +
+  labs(title = paste("Departure Delay Distribution (Post-Cleaning) | 
+                     Total Observations:", post_clean_count),
+       x = "Departure Delay (minutes)",
+       y = "Frequency") +
+  theme_minimal()
+
+# POST-CLEANING HISTOGRAM: Arrival Delay
+p4 <- ggplot(clean_flights, aes(x = arr_delay)) +
+  geom_histogram(binwidth = 10, fill = "purple", color = "black") +
+  labs(title = paste("Arrival Delay Distribution (Post-Cleaning) | 
+                     Total Observations:", post_clean_count),
+       x = "Arrival Delay (minutes)",
+       y = "Frequency") +
+  theme_minimal()
+
+# Printing of all histograms
+p1
+p2
+p3
+p4
+```
+
+The histograms generated here gave us a graphical representation of the 
+distribution of departure and arrival delays prior to and post data cleaning. 
+The inferences drawn based on these plots helped us better understand the nature
+of delays in NYC flights.
+
+Pre-Cleaning Observations: 
+
+Total Observations Before Cleaning: 336,776
+
+Departure Delay Distribution (Pre-Cleaning):
+
+We had a dense spike at zero due to the fact that a significant number of 
+flights were on time.
+
+We have numerous points of very high departure delays, some of which are more 
+than 1000 minutes.
+
+The data contained a very wide range of delay values from negative delays, 
+which indicate early departures.
+
+Arrival Delay Distribution (Prior to Cleaning):
+
+Similar to departure delays, most flights had minimal arrival delay, with some 
+arriving on time.
+
+There were also outliers where flights had very high arrival delays.
+
+The fact that there were outliers means that data cleaning was required.
+
+Post-Cleaning Observations
+
+Total Observations After Cleaning: 307,200
+
+Departure Delay Distribution (After Cleaning):
+
+After removing missing values and unrealistic extreme delays, the data set was 
+more structured.
+
+Early departures beyond -30 minutes were removed to ensure a reasonable data 
+distribution.
+
+The updated histogram still had a strong peak at zero but appears more polished.
+
+Arrival Delay Distribution (Post-Cleaning):
+
+The histogram appeared smoother than the pre-cleaning one.
+
+Outliers and high delays had been removed, and the data was more reliable
+to analyze.
+
+The distribution still reflected the trend as forecasted but without the 
+presence of absurd extreme delays.
+
+Key Takeaways : 
+
+The cleaning process improved the dataset by removing missing values and
+extreme delay occurrences.
+
+The cleaned dataset provided a better representation of true real-world flight 
+delays.
+
+These modifications allowed for more accurate modeling and analysis in the 
+future. This was a crucial step before correlation analysis and predictive
+modeling since it ensured the dataset remained realistic, meaningful, and 
+free from anomalies.
+
+```{r}
+# WORD CLOUD ANALYSIS
+
+# PRE-CLEANING: Total Observations Before Cleaning
+pre_clean_count <- nrow(flights)
+
+# PRE-CLEANING WORD CLOUD: Airline Carriers
+carrier_freq_pre <- flights %>%
+  count(carrier) %>%
+  filter(n > 50)  # Filtering out rare airlines
+
+wordcloud(words = carrier_freq_pre$carrier, 
+          freq = carrier_freq_pre$n, 
+          min.freq = 50, 
+          random.order = FALSE, 
+          colors = brewer.pal(8, "Set1"))
+
+# PRE-CLEANING WORD CLOUD: Destination Airports
+dest_freq_pre <- flights %>%
+  count(dest) %>%
+  filter(n > 50)  # Filtering out rare destinations
+
+wordcloud(words = dest_freq_pre$dest, 
+          freq = dest_freq_pre$n, 
+          min.freq = 50, 
+          random.order = FALSE, 
+          colors = brewer.pal(8, "Dark2"))
+
+# DATA CLEANING: Remove missing values & low-frequency destinations
+clean_flights <- flights %>%
+  filter(!is.na(carrier), !is.na(dest)) %>%
+  group_by(dest) %>%
+  filter(n() > 50)  # Keeping only frequent destinations
+
+# POST-CLEANING: Total Observations After Cleaning
+post_clean_count <- nrow(clean_flights)
+
+# POST-CLEANING WORD CLOUD: Airline Carriers
+carrier_freq_post <- clean_flights %>%
+  count(carrier)
+
+wordcloud(words = carrier_freq_post$carrier, 
+          freq = carrier_freq_post$n, 
+          min.freq = 50, 
+          random.order = FALSE, 
+          colors = brewer.pal(8, "Set1"))
+
+# POST-CLEANING WORD CLOUD: Destination Airports
+dest_freq_post <- clean_flights %>%
+  count(dest)
+
+wordcloud(words = dest_freq_post$dest, 
+          freq = dest_freq_post$n, 
+          min.freq = 50, 
+          random.order = FALSE, 
+          colors = brewer.pal(8, "Dark2"))
+```
+
+Here, we highlighted the visualization of frequency for carriers and 
+destination airports in word clouds. The two phases of the process were 
+pre-cleaning and post-cleaning.
+
+Pre-Cleaning Analysis
+
+Carrier Frequency (First Word Cloud - Pre-Cleaning):
+
+The initial word cloud illustrated the frequency of airline carriers before 
+data cleaning.
+
+Larger-sized words denoted carriers with more flights.
+
+There were a few airlines that appear prominently, e.g., UA (United Airlines), 
+AA (American Airlines), and DL (Delta Airlines), suggesting that these were 
+some of the most frequently recorded carriers in the dataset.
+
+Carriers with hardly any data points were also included at this stage.
+
+Destination Frequency (Second Word Cloud - Pre-Cleaning):
+
+The second word cloud reflected the most common destination airports.
+
+Airports like ORD (Chicago O'Hare), ATL (Atlanta), and LAX (Los Angeles) are 
+the most frequently recorded, as reflected by their larger word sizes.
+
+The visualization indicated that NYC flights are highly concentrated towards
+major hub airports.
+
+Post-Cleaning Analysis
+
+Carrier Frequency (Third Word Cloud - Post-Cleaning):
+
+After data cleaning, we excluded carriers with very low occurrences.
+
+The third word cloud indicates a cleaned dataset, where only popular airlines 
+remained.
+
+The overall pattern remained the same, but fewer common carriers had been 
+eliminated.
+
+Destination Frequency (Fourth Word Cloud - Post-Cleaning):
+
+Similar to carrier analysis, the final word cloud of the destination focused on 
+places that were most frequently visited.
+
+Some low-frequency airports had been removed, so a more stable dataset remained.
+
+The organization remained the same, with major hub airports still being dominant
+in the dataset.
+
+Key Takeaways
+
+The word clouds were able to determine which destination airports and airlines 
+are most prevalent in the data set.
+
+Cleaning of data helped eliminate noise through the deletion of low-frequency 
+appearing airlines and destinations.
+
+Analysis post-cleaning presented a clearer, more organized picture of flight 
+distribution.
+
+Major American airports such as ORD, ATL, LAX, and SFO remained to be the 
+majority, validating heavy traffic between NYC and these airports.
+
+This analysis offered significant information regarding airline operations, 
+which can assist in comprehending the flight routes from New York's key 
+airports.
+
+```{r}
+# CORRELATION ANALYSIS
+
+# PRE-CLEANING: Selecting relevant numerical variables
+flights_numeric_pre <- flights %>%
+  select(dep_delay, arr_delay, air_time, distance) %>%
+  drop_na()  # Removing missing values
+
+# PRE-CLEANING: Reduced Data Size for Faster Execution
+flights_numeric_pre_sample <- flights_numeric_pre %>% sample_n(5000)
+
+# PRE-CLEANING: Correlation Matrix Plot (Reduced Data for Performance)
+p1 <- ggpairs(flights_numeric_pre_sample) +
+  ggtitle("Correlation Matrix (Pre-Cleaning) | Sample Size: 5000")
+
+# CLEANING STEP: Removal of extreme outliers
+clean_flights_numeric <- flights %>%
+  drop_na(dep_delay, arr_delay, air_time, distance) %>% 
+  filter(between(dep_delay, -30, 500),   # Removing unrealistic delays
+         between(arr_delay, -30, 500),
+         air_time > 0, distance > 0) %>%
+  select(dep_delay, arr_delay, air_time, distance)
+
+# POST-CLEANING: Reduced Data Size for Faster Execution
+clean_flights_numeric_sample <- clean_flights_numeric %>% sample_n(5000)
+
+# POST-CLEANING: Correlation Matrix Plot (Reduced Data for Performance)
+p2 <- ggpairs(clean_flights_numeric_sample) +
+  ggtitle("Correlation Matrix (Post-Cleaning) | Sample Size: 5000")
+
+# Printing the plots
+print(p1)
+print(p2)
+```
+
+The correlation analysis was conducted in two phases: pre-cleaning and
+post-cleaning, using a smaller sample of 5000 observations to ensure 
+maximum performance.
+
+Pre-Cleaning Analysis:
+
+The correlation matrix before cleaning revealed a very high positive 
+correlation (0.911) between departure delay (dep_delay) and arrival delay 
+(arr_delay), confirming that delays at departure are likely to lead to delays
+at arrival.
+
+Air time (air_time) and distance showed a very high correlation coefficient 
+(0.991), as expected because of the fact that longer distances traveled are
+naturally coupled with longer air time.
+
+The other correlations, e.g., between delay measures and flight distance or 
+air time, were in contrast weak, consistent with the fact that trends in delays 
+are not greatly affected by how far the flight travels.
+
+Post-Cleaning Analysis:
+
+After removing missing values and extreme outliers, the patterns of 
+correlations overall were the same.
+
+The correlation between departure delay and arrival delay also rose slightly 
+to 0.919, indicating a more accurate relationship after cleaning.
+
+The correlation between air time and distance also remained the same at 0.991, 
+confirming that this correlation was high regardless of data cleaning.
+
+Weak correlations between other variables also saw marginal changes, but overall
+understanding was preserved.
+
+Key Takeaways:
+
+Cleaning did not alter significantly the correlation structure, and that 
+implies extreme values were not unbalancedly affecting relationships between 
+variables.
+
+The high correlation between departure and arrival delays is an implication of 
+how important it is to handle on-time departure in order to minimize arrival 
+delays.
+
+Of course, distance and air time correlate, and that confirms predictive models 
+should look into other reasons behind delays rather than flight duration.
+
+This analysis aids in identifying the interaction of different variables and 
+assists us in validating that our dataset is clean and ready for further 
+predictive modeling.
+
+**Model Selection and Justification**
+
+Based on our structured data analysis, we chose Multiple Linear Regression 
+(MLR) and Random Forest Regression (RFR) as the final predictive models. 
+Both models serve different purposes and complement each other in handling
+NYC flight delay predictions.
+
+Multiple Linear Regression (MLR) was selected because flight delays depend on
+multiple independent factors such as departure time, carrier performance, 
+distance, and previous delays. MLR efficiently models these relationships 
+when they are linear and provides an interpretable equation that helps 
+understand the impact of each predictor.
+
+Random Forest Regression (RFR) was chosen due to the potential non-linearity in 
+flight delay data. Factors such as weather conditions, seasonal variations, and
+airport congestion may introduce complexities that MLR cannot capture. RFR is 
+robust in handling such variations and minimizes overfitting by aggregating 
+multiple decision trees.
+
+By combining these models, we ensured that we capture both linear trends 
+(through MLR) and complex, non-linear relationships (through RFR).
+
+**Feature Selection**
+
+To ensure optimal model performance, we selected the following variables:
+
+1. Flight Timing Factors: Scheduled departure time, month, day, and hour.
+
+2. Carrier Performance: Airline carrier type, historical delays.
+
+3. Distance & Flight Duration: The distance between origin and destination, air 
+time.
+
+4. Historical Delays: Past departure and arrival delays.
+
+**Assumptions and Preprocessing**
+
+Before modeling, the following preprocessing steps were undertaken:
+
+For MLR:
+
+1. Checked for linearity assumptions and removed extreme outliers.
+
+2. Encoded categorical variables like carrier and origin airport using one-hot 
+encoding.
+
+3. Standardized numerical features to improve model performance.
+
+For RFR:
+
+1. Handled missing values and non-linearity.
+
+2. Applied feature selection based on variable importance.
+
+3. No need for standardization, as tree-based models are insensitive to scale.
+
+**Multiple Linear Regression (MLR) Model Implementation and Interpretation**
+
+```{r}
+# Step 1: Data Preprocessing
+mlr_data <- flights %>%
+  select(arr_delay, dep_delay, air_time, distance, carrier, origin, dest) %>%
+  drop_na()  # Remove missing values
+
+# Step 2: Convert categorical variables to factors
+mlr_data <- mlr_data %>%
+  mutate(carrier = as.factor(carrier),
+         origin = as.factor(origin),
+         dest = as.factor(dest))
+
+# Step 3: Splitting the dataset BEFORE encoding (80% training, 20% testing)
+train_index <- createDataPartition(mlr_data$arr_delay, p = 0.8, list = FALSE)
+train_data <- mlr_data[train_index, ]
+test_data <- mlr_data[-train_index, ]
+
+# Step 4: Ensure test data only keeps categories that exist in training
+valid_carriers <- unique(train_data$carrier)
+valid_dests <- unique(train_data$dest)
+valid_origins <- unique(train_data$origin)
+
+test_data <- test_data %>%
+  filter(carrier %in% valid_carriers, dest %in% valid_dests, origin %in% valid_origins)
+
+# Step 5: Ensure factor levels match in both train and test sets
+train_data <- train_data %>%
+  mutate(carrier = factor(carrier, levels = valid_carriers),
+         dest = factor(dest, levels = valid_dests),
+         origin = factor(origin, levels = valid_origins))
+
+test_data <- test_data %>%
+  mutate(carrier = factor(carrier, levels = valid_carriers),
+         dest = factor(dest, levels = valid_dests),
+         origin = factor(origin, levels = valid_origins))
+
+# Step 6: Store 'arr_delay' separately before encoding
+train_arr_delay <- train_data$arr_delay  
+test_arr_delay <- test_data$arr_delay  
+
+# Step 7: One-Hot Encoding AFTER matching levels
+train_encoded <- model.matrix(~ . - 1, data = train_data %>% select(-arr_delay)) %>% as.data.frame()
+test_encoded <- model.matrix(~ . - 1, data = test_data %>% select(-arr_delay)) %>% as.data.frame()
+
+# Step 8: Ensure only valid features exist in both train & test sets
+common_cols <- intersect(names(train_encoded), names(test_encoded))
+train_encoded <- train_encoded[, common_cols, drop = FALSE]  
+test_encoded <- test_encoded[, common_cols, drop = FALSE]  
+
+# Step 9: Fix Rank Deficiency by Removing Perfectly Correlated Columns
+rank_deficiency_cols <- nearZeroVar(train_encoded, saveMetrics = TRUE) %>%
+  filter(nzv) %>%
+  rownames()
+
+train_encoded <- train_encoded %>% select(-any_of(rank_deficiency_cols))
+test_encoded <- test_encoded %>% select(-any_of(rank_deficiency_cols))
+
+# Step 10: Ensure row counts match in train & test datasets
+num_train <- nrow(train_encoded)
+num_test <- nrow(test_encoded)
+
+if (num_test > num_train) {
+  test_encoded <- test_encoded[1:num_train, ]
+} else if (num_train > num_test) {
+  train_encoded <- train_encoded[1:num_test, ]
+}
+
+# Step 11: Reattach 'arr_delay' to the datasets
+train_data <- cbind(arr_delay = train_arr_delay[1:nrow(train_encoded)], train_encoded)
+test_data <- cbind(arr_delay = test_arr_delay[1:nrow(test_encoded)], test_encoded)
+
+# Step 12: Standardizing numerical features
+num_features <- c("dep_delay", "air_time", "distance")
+
+# Compute mean and standard deviation from training data
+train_means <- colMeans(train_data[num_features])
+train_sd <- apply(train_data[num_features], 2, sd)
+
+# Apply scaling based on training set statistics
+train_data[num_features] <- scale(train_data[num_features], center = train_means, scale = train_sd)
+test_data[num_features] <- scale(test_data[num_features], center = train_means, scale = train_sd)
+
+# Step 13: Remove any remaining NA values before model training
+train_data <- train_data %>% select_if(~ !any(is.na(.)))
+test_data <- test_data %>% select_if(~ !any(is.na(.)))
+
+# Step 14: Training the Multiple Linear Regression Model
+mlr_model <- lm(arr_delay ~ ., data = train_data)
+
+# Step 15: Displaying model summary (NO NA Values, No Rank Deficiency)
+print(summary(mlr_model))
+
+# Step 16: Making predictions on the test dataset
+mlr_predictions <- predict(mlr_model, test_data)
+
+# Step 17: Evaluating model performance with multiple metrics
+mlr_rmse <- rmse(test_data$arr_delay, mlr_predictions)  # Root Mean Squared Error
+mlr_mae <- mae(test_data$arr_delay, mlr_predictions)  # Mean Absolute Error
+mlr_mse <- mse(test_data$arr_delay, mlr_predictions)  # Mean Squared Error
+
+# Step 18: Printing all evaluation metrics
+print(paste("RMSE:", mlr_rmse))
+print(paste("MAE:", mlr_mae))
+print(paste("MSE:", mlr_mse))
+```
+
+First, the dataset was preprocessed by selecting relevant features such as 
+arr_delay, dep_delay, air_time, distance, carrier, origin, and dest, while 
+missing values are removed. Since categorical variables (carrier, origin, dest)
+are not usable in raw form, they are converted into factors to allow encoding 
+later. The dataset was then splitted into training (80%) and testing (20%) to 
+ensure the model was trained on one portion and evaluated on unseen data.
+
+To avoid category mismatches between training and testing sets, the test set was
+filtered to include only airlines, destinations, and origins that existed in the
+training set. Next, categorical variables were one-hot encoded using 
+model.matrix(), where each category was transformed into a separate binary 
+column (e.g., carrier_AA, carrier_DL, etc.). Since different levels might exist 
+in training and testing sets, only common features were retained to prevent 
+errors during predictions. Additionally, rank deficiency issues 
+(perfectly correlated features) were addressed by removing variables that 
+contribute minimal variance using nearZeroVar().
+
+To maintain balanced training and testing sets, the number of rows in both 
+datasets were adjusted so that their dimensions match. The target variable 
+arr_delay was then reattached before standardizing numerical features 
+(dep_delay, air_time, distance) using mean and standard deviation from 
+the training data, ensuring uniform scaling across both datasets. Any 
+remaining NA values were removed before proceeding to model training.
+
+Once preprocessing was complete, the Multiple Linear Regression (MLR) model was 
+trained using lm(), and the model summary was displayed to interpret 
+coefficient values and significance levels. Predictions were made on the test 
+dataset, and the model's performance was evaluated using key metrics: Root 
+Mean Squared Error (RMSE), Mean Absolute Error (MAE), and Mean Squared Error 
+(MSE). These metrics quantified the model’s accuracy, showing how well it 
+was generalized to unseen data. The final step printed all evaluation metrics,
+allowing for further comparison with other models like Random Forest Regression.
+
+In terms of the Model Output, it helped us understand how different factors 
+contributed to flight arrival delays. The residuals showcased the difference 
+between the actual delay and the predicted delay. Since the median residual was 
+close to zero, it meant that the model is fairly balanced in predicting delays
+without consistently overestimating or underestimating them. The first quartile 
+(-8.151 minutes) and third quartile (6.603 minutes) indicated that most
+predictions fell within this range, which was a reasonable margin for
+airline delays.
+
+Key Observations from the Model Output:
+
+Departure Delay (31.62 minutes per minute of delay): This confirmed that 
+departure delays had a direct and strong impact on arrival delays. 
+If a flight left late, it was very likely to had arrived late as well.
+
+Air Time (65.32 minutes per additional minute): Longer flights tended to have 
+more accumulated delays, possibly due to increased exposure to weather 
+disruptions, air traffic control delays, or other en-route factors.
+
+Distance (-65.25 minutes per additional mile): This was a surprising outcome. 
+One possible explanation was that longer flights have more buffer time to 
+make up for initial delays. Airlines often adjust speed and flight paths for
+longer routes to recover lost time.
+
+Impact of Airlines on Delays:
+
+United Airlines (UA: +2.24 minutes), American Airlines (AA: +3.16 minutes), 
+and JetBlue (B6: +6.57 minutes) tended to have longer arrival delays, 
+suggesting possible operational inefficiencies or scheduling issues.
+
+Delta Airlines (DL: +0.72 minutes) had relatively lower delays, which indicated
+better on-time performance and efficient scheduling.
+
+Carrier 9E (-0.50 minutes) appeared to have slightly lower arrival delays 
+compared to other airlines, which could've been due to shorter regional 
+flights that are easier to manage.
+
+Impact of Origin and Destination Airports:
+
+JFK (-1.64 minutes) and EWR (-0.76 minutes) had slightly negative coefficients, 
+meaning flights from these airports experienced slightly fewer delays compared 
+to the reference airport. This would've due to scheduling strategies or more 
+efficient air traffic handling.
+
+Hartsfield-Jackson Atlanta (ATL: +5.38 minutes) was associated with longer 
+arrival delays, likely due to its status as one of the busiest airports in 
+the world, leading to congestion and increased taxi times.
+
+Chicago O’Hare (ORD: -4.67 minutes) shows shorter delays, which was a result of
+its well-coordinated flight operations or availability of more alternative 
+flight paths.
+
+Model Performance Metrics:
+
+Residual Standard Error (12.66 minutes): This meant that most of the predicted
+arrival delays are within about 12.66 minutes of the actual delay, which was a
+reasonable margin.
+
+R² Value (87.11%): The model explained that about 87% of the variation in 
+arrival delays, meaning it captured most of the key contributing factors. 
+This is a strong indicator that the model is well-fitted to the data.
+
+F-statistic (2.949e+04, p-value < 2.2e-16): This was a statistical measure 
+showing that the overall model was highly significant and 
+useful in explaining arrival delays.
+
+RMSE (15.46 minutes): The average prediction error was around 15.46 minutes, 
+which meant that while the model performed well, there were still some 
+unpredictable factors affecting arrival delays.
+
+MAE (10.83 minutes): The average absolute difference between actual and 
+predicted arrival delays was 10.83 minutes, 
+suggesting that in many cases, the predictions were fairly close to reality.
+
+MSE (239.14): This was another way of measuring error, where higher values 
+indicated greater deviation from actual delays. This value provided a good 
+benchmark for comparison with other models.
+
+This model did a good job of predicting arrival delays, with a high R² value 
+and strong statistical significance. The most influential factor was departure 
+delay, which had the strongest correlation with arrival delay. 
+Certain airlines and airports also played a role, with some consistently 
+experiencing longer delays. However, since real-world flight delays are 
+influenced by factors like weather conditions, air traffic congestion, and 
+operational constraints, the model may still have room for improvement. 
+Including additional variables such as real-time weather data or airport 
+congestion levels could further enhance the predictive power of the model.
+
+**Random Forest Regression (RFR) Model Implementation and Interpretation**
+
+```{r}
+# Step 1: Data Preprocessing
+rfr_data <- flights %>%
+  select(arr_delay, dep_delay, air_time, distance, carrier, origin, dest) %>%
+  drop_na()  # Remove missing values
+
+# Step 2: Convert categorical variables to factors
+rfr_data <- rfr_data %>%
+  mutate(carrier = as.factor(carrier),
+         origin = as.factor(origin),
+         dest = as.factor(dest))
+
+# Step 3: Splitting the dataset BEFORE encoding (80% training, 20% testing)
+train_index <- createDataPartition(rfr_data$arr_delay, p = 0.8, list = FALSE)
+train_data <- rfr_data[train_index, ]
+test_data <- rfr_data[-train_index, ]
+
+# Step 4: Ensure test data only keeps categories that exist in training
+valid_carriers <- unique(train_data$carrier)
+valid_dests <- unique(train_data$dest)
+valid_origins <- unique(train_data$origin)
+
+test_data <- test_data %>%
+  filter(carrier %in% valid_carriers, dest %in% valid_dests, origin %in% 
+           valid_origins)
+
+# Step 5: Ensure factor levels match in both train and test sets
+train_data <- train_data %>%
+  mutate(carrier = factor(carrier, levels = valid_carriers),
+         dest = factor(dest, levels = valid_dests),
+         origin = factor(origin, levels = valid_origins))
+
+test_data <- test_data %>%
+  mutate(carrier = factor(carrier, levels = valid_carriers),
+         dest = factor(dest, levels = valid_dests),
+         origin = factor(origin, levels = valid_origins))
+
+# Step 6: Store 'arr_delay' separately before encoding
+train_arr_delay <- train_data$arr_delay  
+test_arr_delay <- test_data$arr_delay  
+
+# Step 7: One-Hot Encoding AFTER matching levels
+train_encoded <- model.matrix(~ . - 1, data = train_data %>% 
+                                select(-arr_delay)) %>% as.data.frame()
+test_encoded <- model.matrix(~ . - 1, data = test_data %>% 
+                               select(-arr_delay)) %>% as.data.frame()
+
+# Step 8: Ensure only valid features exist in both train & test sets
+common_cols <- intersect(names(train_encoded), names(test_encoded))
+train_encoded <- train_encoded[, common_cols, drop = FALSE]  
+test_encoded <- test_encoded[, common_cols, drop = FALSE]  
+
+# Step 9: Fix Rank Deficiency by Removing Perfectly Correlated Columns
+rank_deficiency_cols <- nearZeroVar(train_encoded, saveMetrics = TRUE) %>%
+  filter(nzv) %>%
+  rownames()
+
+train_encoded <- train_encoded %>% select(-any_of(rank_deficiency_cols))
+test_encoded <- test_encoded %>% select(-any_of(rank_deficiency_cols))
+
+# Step 10: Ensure row counts match in train & test datasets
+num_train <- nrow(train_encoded)
+num_test <- nrow(test_encoded)
+
+if (num_test > num_train) {
+  test_encoded <- test_encoded[1:num_train, ]
+} else if (num_train > num_test) {
+  train_encoded <- train_encoded[1:num_test, ]
+}
+
+# Step 11: Reattach 'arr_delay' to the datasets
+train_data <- cbind(arr_delay = train_arr_delay[1:nrow(train_encoded)], 
+                    train_encoded)
+test_data <- cbind(arr_delay = test_arr_delay[1:nrow(test_encoded)], 
+                   test_encoded)
+
+# Step 12: Standardizing numerical features
+num_features <- c("dep_delay", "air_time", "distance")
+
+# Compute mean and standard deviation from training data
+train_means <- colMeans(train_data[num_features])
+train_sd <- apply(train_data[num_features], 2, sd)
+
+# Apply scaling based on training set statistics
+train_data[num_features] <- scale(train_data[num_features], center = 
+                                    train_means, scale = train_sd)
+test_data[num_features] <- scale(test_data[num_features], center = 
+                                   train_means, scale = train_sd)
+
+# Step 13: Remove any remaining NA values before model training
+train_data <- train_data %>% select_if(~ !any(is.na(.)))
+test_data <- test_data %>% select_if(~ !any(is.na(.)))
+
+# Step 14: Training the Random Forest Regression Model
+rfr_model <- randomForest(arr_delay ~ ., data = train_data, ntree = 100, 
+                          importance = TRUE)
+
+# Step 15: Displaying model summary (Feature Importance)
+print(rfr_model)
+print(importance(rfr_model))  # Displays feature importance
+
+# Step 16: Making predictions on the test dataset
+rfr_predictions <- predict(rfr_model, test_data)
+
+# Step 17: Evaluating model performance with multiple metrics
+rfr_rmse <- rmse(test_data$arr_delay, rfr_predictions)
+rfr_mae <- mae(test_data$arr_delay, rfr_predictions)  
+rfr_mse <- mse(test_data$arr_delay, rfr_predictions)
+
+# Step 18: Printing all evaluation metrics
+print(paste("RMSE:", rfr_rmse))
+print(paste("MAE:", rfr_mae))
+print(paste("MSE:", rfr_mse))
+```
+
+The implementation of the Random Forest Regression model for predicting flight 
+arrival delays followed a structured process to ensure accurate and reliable 
+results. Initially, the dataset was preprocessed by selecting the most relevant
+variables, including arr_delay, dep_delay, air_time, distance, carrier, origin, 
+and dest. All missing values were removed to prevent any computational errors. 
+Since categorical variables such as carrier, origin, and dest were included in 
+the dataset, they were converted into factor format to allow for proper 
+encoding.
+
+The dataset was then split into training and testing sets, with 80% of the data 
+allocated for training and the remaining 20% for evaluation. To ensure 
+consistency between the datasets, any categories present in the test set that 
+were not included in the training set were filtered out. This step was crucial 
+in preventing errors when making predictions, as the model could not process 
+unseen categorical values effectively.
+
+Following this, one-hot encoding was applied to transform categorical variables 
+into numerical format. This process expanded the dataset by creating binary 
+columns for each category, enabling the Random Forest model to interpret 
+categorical data appropriately. Any unnecessary or highly correlated features 
+were removed to prevent redundancy and potential multicollinearity issues. 
+To further standardize the dataset, numerical features such as dep_delay, 
+air_time, and distance were normalized using the mean and standard deviation 
+calculated from the training data. This ensured that all numerical variables 
+were on the same scale, preventing any single feature from disproportionately 
+influencing the model’s predictions.
+
+Once the preprocessing steps were completed, the Random Forest Regression model 
+was trained using 100 trees. This approach was chosen to strike a balance 
+between computational efficiency and predictive accuracy. The model summary 
+showed that dep_delay was the most influential factor in predicting arrival 
+delays, significantly impacting the model's performance. Other key variables 
+included air_time, distance, and certain carriers such as MQ and US, as well as
+origin airports like LGA and EWR. These variables showed high values for MSE, 
+indicating their strong influence on prediction accuracy.
+
+After training, the model was evaluated using multiple performance metrics. 
+The Root Mean Squared Error (RMSE) was 17.29, representing the average deviation
+of predictions from actual arrival delays. The Mean Absolute Error (MAE) stood 
+at 11.71, indicating the average absolute difference between predicted and 
+actual values. The Mean Squared Error (MSE) was 298.90, reflecting the 
+overall variance of the predictions. The model successfully explained 
+82.19% of the variance in arrival delays, demonstrating its ability to capture
+meaningful patterns from the dataset.
+
+Upon reviewing the results, it was evident that the Random Forest model 
+performed well in handling complex relationships between multiple variables. 
+However, it exhibited slightly higher error values compared to the Multiple 
+Linear Regression (MLR) model. The advantage of using Random Forest was its 
+ability to manage non-linear interactions and variable dependencies, making 
+it robust against overfitting. In contrast, MLR relied on a linear assumption, 
+making it easier to interpret but potentially less effective when dealing with 
+complex data. Ultimately, the choice between these two models depended on the 
+specific application: MLR was more suitable for interpretability and 
+computational efficiency, whereas Random Forest provided greater accuracy when 
+dealing with intricate variable interactions.
+
+**Comparison between MLR and RFR**
+
+In comparing the two models, it was observed that MLR achieved a lower RMSE 
+(15.464) and MSE (239.144) compared to RFR, which had an RMSE of 17.836 and an 
+MSE of 318.126. This indicated that MLR provided slightly better predictive 
+accuracy in terms of minimizing error in flight delay predictions. The MAE, 
+which measures the absolute average error, was also lower for MLR (10.834) 
+than for RFR (11.916), further confirming that MLR generally produced 
+predictions closer to actual values.
+
+In terms of R-Squared, which measures how well the independent variables 
+explain the variability of the dependent variable, MLR had a higher value
+(0.8711) compared to RFR (0.822). This suggested that MLR explained more of the
+variance in arrival delays than RFR. However, RFR had the advantage of 
+capturing more complex relationships between variables, whereas MLR relied on
+fixed coefficients that assumed linear relationships.
+
+Feature importance also differed significantly. MLR assigned fixed coefficients 
+to each independent variable, making it easier to interpret the influence of 
+each factor on arrival delays. On the other hand, RFR determined feature 
+importance dynamically based on decision trees, giving a more flexible 
+understanding of variable contributions but making interpretation more 
+challenging.
+
+One of the major advantages of RFR was its ability to handle non-linearity. 
+While MLR assumed a strict linear relationship between dependent and independent
+variables, RFR was capable of modeling complex and nonlinear interactions, 
+making it more adaptable to varied datasets. This made RFR particularly useful 
+in scenarios where flight delays depended on multiple interdependent factors.
+
+From an interpretability standpoint, MLR was the preferred choice due to its 
+clear coefficient assignments. Analysts could easily quantify the impact of 
+each predictor variable. In contrast, RFR, being an ensemble method, required
+examining decision trees and feature importance scores, which made 
+interpretation more difficult.
+
+**Conclusion**
+
+After thoroughly analyzing flight delays using both Multiple Linear Regression 
+(MLR) and Random Forest Regression (RFR), it became evident that both models had
+their strengths and weaknesses. MLR demonstrated better overall performance
+with lower RMSE and MSE values, suggesting that it provided a more stable and 
+predictable relationship between flight delay factors. RFR, on the other hand, 
+captured more complex interactions within the dataset but at the cost of 
+slightly higher errors. The R-squared value for MLR (87.11%) was higher than 
+that of RFR (82.20%), reinforcing the fact that MLR explained variance in delays
+better. Departure delay emerged as the most critical predictor in both models, 
+with factors like air time, distance, and carrier type playing secondary roles. 
+RFR indicated slightly better feature importance distribution but struggled with
+higher variance in predictions. Given these results, MLR was preferred for its 
+interpretability and lower error rate, making it a more suitable model for 
+flight delay prediction in this dataset. However, RFR remains a strong 
+alternative if non-linearity and interactions between variables need deeper 
+exploration.
+

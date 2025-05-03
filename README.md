@@ -2,7 +2,7 @@
 
 Predict flight arrival delays for New York City’s major airports (JFK, LGA, EWR) using 2013 flight data. This repository contains end-to-end analysis: data cleaning, EDA, feature engineering, model training (Multiple Linear Regression & Random Forest), and performance comparison.
 
-## 🚀 Features
+## Features
 
 * **Data Preparation & Cleaning**: Handle missing values, outliers, and format consistency.
 * **Exploratory Data Analysis (EDA)**: Histograms, word clouds, correlation matrices, geospatial insights.
@@ -14,23 +14,6 @@ Predict flight arrival delays for New York City’s major airports (JFK, LGA, EW
 * **Evaluation**: RMSE, MAE, MSE, R² comparisons.
 * **Reproducibility**: Fixed random seed, clear preprocessing pipeline.
 
-## 📂 Repository Structure
-
-```
-├── data/                  # Raw and cleaned datasets
-│   ├── flights.csv
-│   ├── weather.csv
-│   └── ...
-├── notebooks/             # Jupyter notebooks for analysis and modeling
-│   ├── 01_data_cleaning.ipynb
-│   ├── 02_eda.ipynb
-│   └── 03_modeling.ipynb
-├── src/                   # R scripts and helper functions
-│   └── utils.R
-├── results/               # Figures, tables, and model outputs
-├── README.md              # Project overview and instructions
-└── requirements.txt       # R package dependencies
-```
 
 ## 📦 Installation
 
